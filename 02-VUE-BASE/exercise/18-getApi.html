@@ -43,23 +43,73 @@
   </head>
   <body>
     <div id="app">
-      <div class="box">
+      <div v-show="isLoad" class="box">
         <div>
-          <img class="img" src="" alt="" />
+          <img
+            v-for="(img, idx) in imgObj.imgList"
+            v-show="idx === imgIdx"
+            :key="img.url"
+            class="img"
+            :src="img.url"
+            alt=""
+          />
         </div>
         <div class="btnbox">
-          <a href="javascript:;">上一張</a>
-          <a href="javascript:;">下一張</a>
+          <a @click="imgNex" href="javascript:;">上一張</a>
+          <a @click="imgPrev" href="javascript:;">下一張</a>
         </div>
       </div>
-      <img class="load" src="./images/load.gif" alt="" />
+      <img v-if="!isLoad" class="load" src="./images/load.gif" alt="" />
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
+      const { onMounted, ref, reactive } = Vue;
       const app = {
         setup() {
-          return {};
+          const imgObj = reactive({ imgList: [] });
+          const imgIdx = ref(0);
+          const isLoad = ref(false);
+
+          const imgNex = () => {
+            imgIdx.value++;
+            if (imgIdx.value === imgObj.imgList.length) {
+              imgIdx.value = 0;
+            }
+          };
+
+          const imgPrev = () => {
+            imgIdx.value--;
+            if (imgIdx.value < 0) {
+              imgIdx.value = imgObj.imgList.length - 1;
+            }
+          };
+
+          const handleImgLoad = (imgList) => {
+            let i = 0;
+            imgObj.imgList = imgList;
+
+            imgList.forEach((img) => {
+              const newImg = new Image();
+              newImg.src = img.url;
+              newImg.onload = () => {
+                i++;
+                if (i === imgList.length) {
+                  isLoad.value = true;
+                }
+              };
+            });
+          };
+
+          onMounted(() => {
+            axios
+              .get("https://vue-lessons-api.herokuapp.com/photo/list")
+              .then((res) => {
+                handleImgLoad(res.data);
+              });
+          });
+
+          return { imgObj, imgNex, imgPrev, imgIdx, isLoad };
         },
       };
       Vue.createApp(app).mount("#app");

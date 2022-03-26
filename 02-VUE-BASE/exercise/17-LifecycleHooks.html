@@ -15,7 +15,9 @@
       const { ref, onBeforeMount, onMounted, onUpdated } = Vue;
       const App = {
         setup() {
+          console.log("Setup");
           const idx = ref(0);
+          let aa = 10;
           setTimeout(() => {
             idx.value = 1;
             console.log(idx.value);
@@ -32,6 +34,15 @@
             // 在資料更改導致virtual DOM重新渲染後調用
             console.log("資料更改後");
           });
+
+          aa++;
+          console.log(aa);
+
+          for (let i = 0; i < 100000; i++) {
+            if (i === 99999) {
+              console.log("Yo");
+            }
+          }
 
           return {
             idx,
