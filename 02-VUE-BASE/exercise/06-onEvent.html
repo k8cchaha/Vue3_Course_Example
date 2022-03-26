@@ -7,15 +7,28 @@
   </head>
   <body>
     <div id="app">
-      <h1></h1>
-      <button>Add</button>
-      <button>Remove</button>
+      <h1>{{num}}</h1>
+      <h1>{{num2.val}}</h1>
+      <button @click="addFn">Add</button>
+      <button @click="removeFn">Remove</button>
     </div>
     <script src="./js/vue.js"></script>
     <script>
+      const { ref, reactive } = Vue;
       const App = {
         setup() {
-          return {};
+          const num = ref(0);
+          const num2 = reactive({ val: 0 });
+
+          const addFn = () => {
+            num.value++;
+            num2.val++;
+          };
+          const removeFn = () => {
+            num.value--;
+            num2.val--;
+          };
+          return { num, num2, addFn, removeFn };
         },
       };
       Vue.createApp(App).mount("#app");

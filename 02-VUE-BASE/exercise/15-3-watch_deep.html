@@ -15,11 +15,17 @@
         setup() {
           const data = ref({ user: {} });
 
-          watch(data, (newVal) => {
-            console.log(newVal);
-          });
+          watch(
+            data,
+            (newVal) => {
+              console.log(newVal);
+            },
+            { deep: true }
+          );
 
-          setTimeout(() => {}, 1000);
+          setTimeout(() => {
+            data.value.user["name"] = "mike";
+          }, 1000);
 
           return {};
         },

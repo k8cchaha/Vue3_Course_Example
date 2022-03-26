@@ -7,20 +7,23 @@
   </head>
   <body>
     <div id="app">
-      <h1></h1>
-      <input type="text" />
+      <h1>{{msg.text}}</h1>
+      <input type="text" v-model="msg.text" />
       <br />
       <br />
       <br />
-      <h1></h1>
-      <input type="text" />
+      <h1>{{text}}</h1>
+      <input type="text" v-model="text" />
     </div>
     <script src="./js/vue.js"></script>
     <script>
       const { ref, reactive } = Vue;
       const App = {
         setup() {
-          return {};
+          const msg = reactive({ text: "Hello 123" });
+          const text = ref("Hi Good");
+
+          return { msg, text };
         },
       };
       Vue.createApp(App).mount("#app");
