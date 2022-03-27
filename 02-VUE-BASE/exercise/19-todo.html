@@ -10,28 +10,78 @@
     <div id="app">
       <div class="wait">
         <ul>
-          <li>
-            <img src="" alt="" />
+          <li
+            v-for="(img, idx) in initTodo.content"
+            :key="img.url"
+            @click="handleClick(img, idx)"
+          >
+            <img :src="img.url" alt="" />
           </li>
         </ul>
       </div>
       <div class="carried">
         <ul>
-          <li>
-            <img alt="" />
+          <li
+            v-for="(img, idx) in finishTodo.content"
+            :key="img.url"
+            @click="handleReset(img, idx)"
+          >
+            <img :src="img.url" alt="" />
           </li>
         </ul>
       </div>
-      <div class="winPage">
+      <div :class="['winPage', {open: isWin}]">
         <h1>闖關成功</h1>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
+      const { reactive, ref, onMounted, watch } = Vue;
       const app = {
         setup() {
-          return {};
+          const initTodo = reactive({ content: [] });
+          const finishTodo = reactive({ content: [] });
+          const winCount = ref(0);
+          const isWin = ref(false);
+
+          watch(
+            () => finishTodo.content,
+            (newList) => {
+              winCount.value = 0;
+              newList.forEach((item, idx) => {
+                if (item.idx === idx) {
+                  winCount.value++;
+                  console.log(winCount.value);
+                }
+              });
+            },
+            { deep: true }
+          );
+
+          watch(winCount, (newVal) => {
+            if (newVal === 9) {
+              isWin.value = true;
+            }
+          });
+
+          const handleClick = (img, idx) => {
+            finishTodo.content.push(img);
+            initTodo.content.splice(idx, 1);
+          };
+
+          const handleReset = (img, idx) => {
+            initTodo.content.push(img);
+            finishTodo.content.splice(idx, 1);
+          };
+
+          onMounted(() => {
+            axios.get("api/puzzle.json").then((res) => {
+              initTodo.content = res.data;
+            });
+          });
+
+          return { initTodo, finishTodo, handleClick, handleReset, isWin };
         },
       };
       Vue.createApp(app).mount("#app");
