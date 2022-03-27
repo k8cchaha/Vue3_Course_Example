@@ -10,21 +10,61 @@
   <body>
     <div id="app">
       <div class="select-box">
-        <select>
+        <select v-model="activeCity">
           <option disabled value="">請選擇縣市</option>
+          <option
+            v-for="city in cityList.city"
+            :key="city.name"
+            :value="city.name"
+          >
+            {{city.name}}
+          </option>
         </select>
-        <select>
+        <select v-model="activeArea">
           <option disabled value="">請選擇區域</option>
+          <option
+            v-for="area in cityList.area"
+            :key="area.name"
+            :value="area.name"
+          >
+            {{area.name}}
+          </option>
         </select>
       </div>
-      <a class="btn">送出</a>
+      <a class="btn" @click="onSubmit">送出</a>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
+      const { onMounted, reactive, ref, watch } = Vue;
       const App = {
         setup() {
-          return {};
+          const cityList = reactive({ city: [], area: [] });
+          const activeCity = ref("");
+          const activeArea = ref("");
+
+          watch(activeCity, (newCity) => {
+            activeArea.value = "";
+            var selectCity = cityList.city.filter((item) => {
+              return newCity === item.name;
+            });
+            cityList.area = selectCity[0].area;
+          });
+
+          const onSubmit = () => {
+            console.log("Result: ", activeCity.value, activeArea.value);
+          };
+
+          onMounted(() => {
+            axios
+              .get("https://vue-lessons-api.herokuapp.com/city/list")
+              .then((res) => {
+                console.log(res.data);
+                cityList.city = res.data.twzip.city;
+              });
+          });
+
+          return { cityList, activeCity, activeArea, onSubmit };
         },
       };
 

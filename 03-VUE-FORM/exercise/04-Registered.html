@@ -9,7 +9,7 @@
   </head>
   <body>
     <div id="app">
-      <div>
+      <div v-if="!isReg">
         <div class="input-box">
           <p>NAME</p>
           <input
@@ -17,7 +17,7 @@
             placeholder="輸入使用者名稱"
             v-model="registered.username"
           />
-          <p class="error"></p>
+          <p class="error" v-if="errorMsg.username">{{errorMsg.username}}</p>
         </div>
         <div class="input-box">
           <p>PASSWORD</p>
@@ -26,7 +26,7 @@
             placeholder="輸入密碼"
             v-model="registered.password"
           />
-          <p class="error"></p>
+          <p class="error" v-if="errorMsg.password">{{errorMsg.password}}</p>
         </div>
         <div class="input-box">
           <p>E-MAIL</p>
@@ -35,7 +35,7 @@
             placeholder="輸入email"
             v-model="registered.email"
           />
-          <p class="error"></p>
+          <p class="error" v-if="errorMsg.email">{{errorMsg.email}}</p>
         </div>
         <div class="input-box">
           <p>年齡</p>
@@ -55,9 +55,9 @@
           <input type="checkbox" id="checkbox" v-model="registered.terms" />
           <label for="checkbox">我已閱讀使用者條款</label>
         </div>
-        <a class="btn">送出</a>
+        <a class="btn" @click="onSubmit">送出</a>
       </div>
-      <div>
+      <div v-if="isReg">
         <h1>註冊成功</h1>
       </div>
     </div>
@@ -74,9 +74,10 @@
       }
      -->
     <script>
-      const { reactive } = Vue;
+      const { reactive, ref } = Vue;
       const app = {
         setup() {
+          const isReg = ref(false);
           const registered = reactive({
             username: "",
             password: "",
@@ -85,8 +86,33 @@
             age: "",
             terms: false,
           });
+          const errorMsg = reactive({});
 
-          return { registered };
+          const handError = (errObj) => {
+            Object.keys(errorMsg).forEach((key) => {
+              errorMsg[key] = "";
+            });
+
+            Object.keys(errObj).forEach((err) => {
+              errorMsg[err] = errObj[err];
+            });
+          };
+
+          const onSubmit = () => {
+            axios
+              .post(
+                "https://vue-lessons-api.herokuapp.com/auth/registered",
+                registered
+              )
+              .then((res) => {
+                isReg.value = true;
+              })
+              .catch((err) => {
+                handError(err.response.data.error_message);
+              });
+          };
+
+          return { isReg, registered, errorMsg, onSubmit };
         },
       };
 
